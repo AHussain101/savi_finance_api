@@ -1,0 +1,48 @@
+{
+  "name": "finflux-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:test": "tsx scripts/test-db.ts",
+    "cache:test": "tsx scripts/test-cache.ts",
+    "cache:hydrate": "tsx scripts/hydrate-cache.ts",
+    "seed:registry": "tsx scripts/seed-registry.ts",
+    "ingest": "tsx src/jobs/index.ts",
+    "ingest:fiat": "tsx src/jobs/ingest-fiat.ts",
+    "ingest:crypto": "tsx src/jobs/ingest-crypto.ts",
+    "ingest:stocks": "tsx src/jobs/ingest-stocks.ts",
+    "ingest:metals": "tsx src/jobs/ingest-metals.ts"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.12.0",
+    "@stripe/stripe-js": "^5.5.0",
+    "@upstash/redis": "^1.34.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.474.0",
+    "mongoose": "^8.9.5",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.5.0",
+    "svix": "^1.45.1",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.10",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
