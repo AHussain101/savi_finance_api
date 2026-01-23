@@ -65,23 +65,23 @@ npm run dev
 
 ### Required API Keys
 
-Create accounts and obtain API keys from these services:
+Create accounts and obtain API keys from these services. **All services have FREE tiers for development!**
 
-#### Core Services
-| Service | Purpose | Sign Up URL |
-|---------|---------|-------------|
-| **Clerk** | Authentication | https://clerk.com |
-| **Stripe** | Billing | https://stripe.com |
-| **MongoDB Atlas** | Database | https://mongodb.com/atlas |
-| **Upstash** | Redis Cache | https://upstash.com |
+#### Core Services (All Free for Dev)
+| Service | Purpose | Sign Up URL | Free Tier |
+|---------|---------|-------------|-----------|
+| **Clerk** | Authentication | https://clerk.com | 10k MAU |
+| **Stripe** | Billing | https://stripe.com | Test mode free |
+| **MongoDB Atlas** | Database | https://mongodb.com/atlas | 512MB free forever |
+| **Upstash** | Redis Cache | https://upstash.com | 10k requests/day |
 
-#### Data Providers
-| Service | Purpose | Sign Up URL |
-|---------|---------|-------------|
-| **AlphaVantage** | NASDAQ stocks | https://www.alphavantage.co/support/#api-key |
-| **CoinGecko** | Crypto rates | https://www.coingecko.com/en/api |
-| **OpenExchangeRates** | Fiat currencies | https://openexchangerates.org/signup |
-| **Metals-API** | Precious metals | https://metals-api.com |
+#### Data Providers (All Free for Dev)
+| Service | Purpose | Sign Up URL | Free Tier |
+|---------|---------|-------------|-----------|
+| **AlphaVantage** | NASDAQ stocks | https://www.alphavantage.co/support/#api-key | 25 requests/day |
+| **CoinGecko** | Crypto rates | https://www.coingecko.com/en/api | Unlimited (no key needed!) |
+| **OpenExchangeRates** | Fiat currencies | https://openexchangerates.org/signup | 1000 requests/month |
+| **Metals-API** | Precious metals | https://metals-api.com | 50 requests/month |
 
 ## Environment Variables
 

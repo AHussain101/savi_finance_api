@@ -41,29 +41,31 @@ Visit http://localhost:3000 to see the app.
 
 **Read your guide first!** It contains detailed instructions for your responsibilities.
 
+**IMPORTANT:** Also read [docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) to learn how to merge your work without breaking others' code!
+
 ---
 
 ## Required API Keys
 
 Everyone needs to set up these services. Share the keys in a secure channel.
 
-### Core Services (Matthew will set these up)
+### Core Services (Matthew will set these up) - ALL FREE TIERS!
 
-| Service | Environment Variable | Sign Up |
-|---------|---------------------|---------|
-| Clerk | `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | https://clerk.com |
-| Stripe | `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` | https://stripe.com |
-| MongoDB | `MONGODB_URI` | https://mongodb.com/atlas |
-| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | https://upstash.com |
+| Service | Environment Variable | Sign Up | Free Tier |
+|---------|---------------------|---------|-----------|
+| Clerk | `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | https://clerk.com | 10k MAU |
+| Stripe | `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` | https://stripe.com | Test mode free |
+| MongoDB | `MONGODB_URI` | https://mongodb.com/atlas | 512MB free |
+| Upstash Redis | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | https://upstash.com | 10k requests/day |
 
-### Data Providers (Sean will set these up)
+### Data Providers (Sean will set these up) - ALL FREE TIERS!
 
-| Service | Environment Variable | Sign Up |
-|---------|---------------------|---------|
-| AlphaVantage | `ALPHAVANTAGE_API_KEY` | https://www.alphavantage.co/support/#api-key |
-| CoinGecko | `COINGECKO_API_KEY` | https://www.coingecko.com/en/api |
-| OpenExchangeRates | `OPENEXCHANGE_APP_ID` | https://openexchangerates.org/signup |
-| Metals-API | `METALS_API_KEY` | https://metals-api.com |
+| Service | Environment Variable | Sign Up | Free Tier |
+|---------|---------------------|---------|-----------|
+| AlphaVantage | `ALPHAVANTAGE_API_KEY` | https://www.alphavantage.co/support/#api-key | 25 requests/day |
+| CoinGecko | `COINGECKO_API_KEY` | https://www.coingecko.com/en/api | Unlimited (no key needed) |
+| OpenExchangeRates | `OPENEXCHANGE_APP_ID` | https://openexchangerates.org/signup | 1000 requests/month |
+| Metals-API | `METALS_API_KEY` | https://metals-api.com | 50 requests/month |
 
 ---
 
