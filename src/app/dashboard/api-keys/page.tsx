@@ -1,36 +1,50 @@
 // API Keys Page - Victoria's responsibility
 // See docs/VICTORIA_FRONTEND.md for implementation details
 
-export default function ApiKeysPage() {
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">API Keys</h1>
-        <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg">
-          Generate New Key
-        </button>
-      </div>
+import { auth } from "@clerk/nextjs/server";
+import { connectToDatabase } from "@/lib/db/connection";
+import { User } from "@/lib/db/models/user";
+import { ApiKey } from "@/lib/db/models/api-key";
+import { ApiKeysClient } from "./api-keys-client";
 
-      {/* TODO: Add API keys table */}
-      <div className="border rounded-lg">
-        <table className="w-full">
-          <thead className="border-b">
-            <tr>
-              <th className="text-left p-4">Name</th>
-              <th className="text-left p-4">Key</th>
-              <th className="text-left p-4">Created</th>
-              <th className="text-left p-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="p-4 text-muted-foreground" colSpan={4}>
-                No API keys yet. Generate your first key to get started.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+interface ApiKeyData {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+async function getApiKeys(userId: string): Promise<ApiKeyData[]> {
+  await connectToDatabase();
+
+  const user = await User.findOne({ clerkId: userId });
+  if (!user) {
+    return [];
+  }
+
+  const keys = await ApiKey.find({ userId: user._id, revokedAt: null })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return keys.map((key: any) => ({
+    id: String(key._id),
+    name: key.name,
+    keyPrefix: key.keyPrefix,
+    createdAt: key.createdAt.toISOString(),
+    lastUsedAt: key.lastUsedAt?.toISOString() || null,
+  }));
+}
+
+export default async function ApiKeysPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null;
+  }
+
+  const keys = await getApiKeys(userId);
+
+  return <ApiKeysClient initialKeys={keys} />;
 }
