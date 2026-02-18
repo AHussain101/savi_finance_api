@@ -1,11 +1,34 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "FinFlux API - Financial Data Made Simple",
+  title: "VaultLine — One API for Every Financial Rate on Earth",
   description:
-    "Set-and-forget financial data service providing EOD exchange rates for Fiat, Crypto, Stocks, and Precious Metals.",
+    "Fiat. Crypto. Stocks. Metals. One key. One schema. One bill. The unified financial data infrastructure layer for the embedded finance era.",
+  openGraph: {
+    title: "VaultLine — One API for Every Financial Rate on Earth",
+    description:
+      "Stop juggling 5 API subscriptions. Fiat, crypto, stocks, and metals — unified under one key, one schema, one bill.",
+    type: "website",
+    url: "https://vaultline.dev",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VaultLine — One API for Every Financial Rate on Earth",
+    description:
+      "Stop juggling 5 API subscriptions. Ship in hours, not weeks.",
+  },
 };
 
 export default function RootLayout({
@@ -14,10 +37,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className="dark">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
+      >
+        {children}
+      </body>
+    </html>
   );
 }
