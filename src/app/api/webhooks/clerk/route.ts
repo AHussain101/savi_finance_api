@@ -4,6 +4,9 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
+import { connectToDatabase } from "@/lib/db/connection";
+import { User } from "@/lib/db/models/user";
+import { ApiKey } from "@/lib/db/models/api-key";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -38,22 +41,63 @@ export async function POST(req: Request) {
     return new Response("Error verifying webhook", { status: 400 });
   }
 
+  await connectToDatabase();
+
   const eventType = evt.type;
 
-  // TODO: Handle different event types
   switch (eventType) {
-    case "user.created":
-      // TODO: Create user in MongoDB (coordinate with Sean)
-      console.log("User created:", evt.data.id);
+    case "user.created": {
+      const { id, email_addresses, primary_email_address_id } = evt.data;
+      const primaryEmail = email_addresses?.find(
+        (e) => e.id === primary_email_address_id
+      );
+      const email = primaryEmail?.email_address || email_addresses?.[0]?.email_address;
+
+      if (email) {
+        await User.create({
+          clerkId: id,
+          email,
+          subscriptionStatus: "inactive",
+        });
+        console.log("User created in MongoDB:", id);
+      }
       break;
-    case "user.updated":
-      // TODO: Update user in MongoDB
-      console.log("User updated:", evt.data.id);
+    }
+    case "user.updated": {
+      const { id, email_addresses, primary_email_address_id } = evt.data;
+      const primaryEmail = email_addresses?.find(
+        (e) => e.id === primary_email_address_id
+      );
+      const email = primaryEmail?.email_address || email_addresses?.[0]?.email_address;
+
+      if (email) {
+        await User.findOneAndUpdate({ clerkId: id }, { email });
+        console.log("User updated in MongoDB:", id);
+      }
       break;
-    case "user.deleted":
-      // TODO: Soft delete user, revoke API keys
-      console.log("User deleted:", evt.data.id);
+    }
+    case "user.deleted": {
+      const { id } = evt.data;
+
+      // Find the user to get their MongoDB _id
+      const user = await User.findOne({ clerkId: id });
+
+      if (user) {
+        // Revoke all API keys for this user
+        await ApiKey.updateMany(
+          { userId: user._id, revokedAt: null },
+          { revokedAt: new Date() }
+        );
+
+        // Mark subscription as canceled
+        await User.findOneAndUpdate(
+          { clerkId: id },
+          { subscriptionStatus: "canceled" }
+        );
+        console.log("User deleted, API keys revoked:", id);
+      }
       break;
+    }
   }
 
   return new Response("Webhook received", { status: 200 });
