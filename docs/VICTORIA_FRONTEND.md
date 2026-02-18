@@ -45,35 +45,35 @@ src/
 ## Tasks Checklist
 
 ### Phase 1: Setup
-- [ ] Install UI dependencies (Tailwind CSS, shadcn/ui)
-- [ ] Set up root layout with Clerk provider
-- [ ] Create basic component structure
-- [ ] Set up globals.css with design tokens
+- [x] Install UI dependencies (Tailwind CSS, shadcn/ui)
+- [x] Set up root layout with Clerk provider
+- [x] Create basic component structure
+- [x] Set up globals.css with design tokens
 
 ### Phase 2: Landing Page
-- [ ] Hero section with value proposition
-- [ ] Features section (4 data types: Fiat, Crypto, Stocks, Metals)
-- [ ] Pricing section ($10/month flat)
-- [ ] Footer with links
-- [ ] CTA buttons linking to sign-up
+- [x] Hero section with value proposition
+- [x] Features section (4 data types: Fiat, Crypto, Stocks, Metals)
+- [x] Pricing section ($10/month flat)
+- [x] Footer with links
+- [x] CTA buttons linking to sign-up
 
 ### Phase 3: Auth Pages
-- [ ] Sign-in page using `<SignIn />` from Clerk
-- [ ] Sign-up page using `<SignUp />` from Clerk
-- [ ] Redirect logic after auth
+- [x] Sign-in page using `<SignIn />` from Clerk
+- [x] Sign-up page using `<SignUp />` from Clerk
+- [x] Redirect logic after auth
 
 ### Phase 4: Dashboard
-- [ ] Dashboard layout with sidebar navigation
-- [ ] Home page with usage statistics (calls this month)
-- [ ] API Keys page (generate, view, revoke keys)
-- [ ] Billing page (link to Stripe Customer Portal)
-- [ ] Documentation page (API reference)
+- [x] Dashboard layout with sidebar navigation
+- [x] Home page with usage statistics (calls this month)
+- [x] API Keys page (generate, view, revoke keys)
+- [x] Billing page (link to Stripe Customer Portal)
+- [x] Documentation page (API reference)
 
 ### Phase 5: Polish
 - [ ] Loading states and skeletons
 - [ ] Error boundaries
-- [ ] Mobile responsive design
-- [ ] Dark mode support (optional)
+- [x] Mobile responsive design *(basic Tailwind responsive classes)*
+- [x] Dark mode support *(CSS variables configured)*
 
 ---
 

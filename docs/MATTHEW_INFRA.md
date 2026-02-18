@@ -38,28 +38,28 @@ src/
 ## Tasks Checklist
 
 ### Phase 1: Project Setup
-- [ ] Initialize Next.js project with TypeScript
-- [ ] Set up ESLint and Prettier
-- [ ] Create .env.example with all required variables
-- [ ] Set up .gitignore properly
-- [ ] Configure next.config.js
+- [x] Initialize Next.js project with TypeScript
+- [x] Set up ESLint and Prettier
+- [x] Create .env.example with all required variables
+- [x] Set up .gitignore properly
+- [x] Configure next.config.js
 
 ### Phase 2: Clerk Integration
-- [ ] Install and configure Clerk SDK
-- [ ] Set up ClerkProvider in root layout
-- [ ] Create auth middleware (protect /dashboard routes)
-- [ ] Set up Clerk webhook endpoint
-- [ ] Handle user.created, user.updated, user.deleted events
-- [ ] Sync user data to MongoDB (coordinate with Sean)
+- [x] Install and configure Clerk SDK
+- [x] Set up ClerkProvider in root layout
+- [x] Create auth middleware (protect /dashboard routes)
+- [x] Set up Clerk webhook endpoint
+- [x] Handle user.created, user.updated, user.deleted events
+- [x] Sync user data to MongoDB (coordinate with Sean)
 
 ### Phase 3: Stripe Integration
-- [ ] Install and configure Stripe SDK
-- [ ] Create Stripe product and price ($10/month)
-- [ ] Set up Stripe webhook endpoint
-- [ ] Handle checkout.session.completed event
-- [ ] Handle customer.subscription.updated/deleted events
-- [ ] Create billing portal redirect endpoint
-- [ ] Implement subscription status checking
+- [x] Install and configure Stripe SDK
+- [ ] Create Stripe product and price ($10/month) *(manual step in Stripe dashboard)*
+- [x] Set up Stripe webhook endpoint
+- [x] Handle checkout.session.completed event
+- [x] Handle customer.subscription.updated/deleted events
+- [x] Create billing portal redirect endpoint
+- [x] Implement subscription status checking
 
 ### Phase 4: Deployment
 - [ ] Set up Vercel project
@@ -67,13 +67,13 @@ src/
 - [ ] Set up production MongoDB (Atlas)
 - [ ] Set up production Redis (Upstash)
 - [ ] Configure custom domain (api.finflux.io)
-- [ ] Set up Vercel Cron for data ingestion jobs
+- [x] Set up Vercel Cron for data ingestion jobs
 
 ### Phase 5: Monitoring & Alerts
 - [ ] Set up error tracking (Sentry or similar)
 - [ ] Configure Slack/Discord alerts for failures
 - [ ] Set up uptime monitoring
-- [ ] Create health check endpoint
+- [x] Create health check endpoint
 
 ---
 
