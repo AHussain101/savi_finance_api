@@ -20,6 +20,23 @@ const plans = [
     ],
   },
   {
+    name: "Standard",
+    price: "$10",
+    period: "/month",
+    annual: "$96/yr (save 20%)",
+    description: "Unlimited access for hobbyists and side projects.",
+    cta: "Start Free Trial",
+    highlight: false,
+    features: [
+      "Unlimited API calls",
+      "EOD data (24hr delayed)",
+      "4 asset classes",
+      "90 days history",
+      "2 API keys",
+      "Email support",
+    ],
+  },
+  {
     name: "Builder",
     price: "$19",
     period: "/month",
@@ -96,7 +113,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
           {plans.map((p) => (
             <div
               key={p.name}
