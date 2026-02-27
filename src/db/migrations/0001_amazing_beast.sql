@@ -1,0 +1,2 @@
+CREATE INDEX "rates_symbol_recorded_date_idx" ON "rates" USING btree ("symbol","recorded_date");--> statement-breakpoint
+CREATE INDEX "usage_logs_api_key_called_at_idx" ON "usage_logs" USING btree ("api_key_id","called_at");

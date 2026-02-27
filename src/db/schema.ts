@@ -24,6 +24,7 @@ import {
   numeric,
   date,
   unique,
+  index,
 } from 'drizzle-orm/pg-core';
 
 // Plan types for MVP
@@ -84,17 +85,23 @@ export const subscriptions = pgTable('subscriptions', {
  * Usage Logs table
  * For analytics and rate-limit verification (Redis is source-of-truth for real-time enforcement)
  */
-export const usageLogs = pgTable('usage_logs', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  apiKeyId: uuid('api_key_id')
-    .notNull()
-    .references(() => apiKeys.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  endpoint: text('endpoint').notNull(),
-  calledAt: timestamp('called_at', { withTimezone: true }).notNull().defaultNow(),
-});
+export const usageLogs = pgTable(
+  'usage_logs',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    apiKeyId: uuid('api_key_id')
+      .notNull()
+      .references(() => apiKeys.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    calledAt: timestamp('called_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('usage_logs_api_key_called_at_idx').on(table.apiKeyId, table.calledAt),
+  ]
+);
 
 /**
  * Rates table
@@ -113,6 +120,7 @@ export const rates = pgTable(
   },
   (table) => [
     unique('rates_symbol_date_unique').on(table.symbol, table.recordedDate),
+    index('rates_symbol_recorded_date_idx').on(table.symbol, table.recordedDate),
   ]
 );
 
