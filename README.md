@@ -1,218 +1,179 @@
 # VaultLine
 
-### The Financial Data Infrastructure Layer for the Embedded Finance Era
+**One API for every financial rate on Earth.**
 
-> **One API for every financial rate on Earth.**
-> Fiat. Crypto. Stocks. Metals. One key. One schema. One bill.
-
----
-
-## The Problem
-
-Developers building multi-asset financial applications today are trapped in a fragmented hellscape:
-
-- **3–5 separate API subscriptions** (Alpha Vantage, CoinGecko, Fixer.io, Metals-API, Polygon...)
-- **3–5 different JSON schemas** to normalize
-- **3–5 different rate limit strategies** to handle
-- **$150–$500/month** in overlapping subscriptions
-- **2–4 weeks** of integration engineering before writing a single line of product code
-
-**VaultLine eliminates the entire integration tax.** One key. One schema. One bill. Ship in hours, not weeks.
+VaultLine is a unified financial data API that provides end-of-day (EOD) exchange rates for fiat currencies, cryptocurrencies, stocks, and precious metals through a single, normalized interface. Two-tier pricing: free Sandbox and $10/month Standard.
 
 ---
 
-## What VaultLine Is
+## Current Status
 
-VaultLine is not "another financial data API." It is the **abstraction layer** — think **Plaid for market data** or **Twilio for financial rates**. We don't compete with data providers; we sit on top of them and sell the normalization.
+### What's Live
 
-### Core Endpoints
+**Data Layer**
+- PostgreSQL database with 5 tables (users, api_keys, subscriptions, usage_logs, rates)
+- Daily EOD ingestion from free-tier providers (Exchange Rates API, CoinGecko, Financial Modeling Prep)
+- ~32 symbols covered: 10 fiat pairs, 7 crypto, 10 stocks, 4 metals
+- Automated cron: ingest at 6 AM UTC daily, prune data older than 90 days weekly
 
-| Endpoint | Description |
-|---|---|
-| `GET /v1/rates` | Unified rate lookup — auto-detects asset class from symbols. BTC→EUR, AAPL→GBP, XAU→JPY — same endpoint, same schema. |
-| `GET /v1/convert` | Cross-asset conversion — `?from=BTC&to=XAU&amount=0.5` → "0.5 BTC = 26.83 troy ounces of Gold". No competitor offers this. |
-| `POST /v1/batch` | Batch lookup — 25 pairs in one request, counts as 1 API call. |
-| `GET /v1/history` | Historical daily EOD data with configurable depth by tier. |
-| `POST /v1/alerts` | Webhook alerts — push notifications when rates cross thresholds with HMAC-SHA256 signed payloads. |
-| `GET /v1/assets` | Asset directory — search and discover supported symbols. |
+**Backend API**
+- 3 data endpoints: `/api/v1/rates`, `/api/v1/rates/history`, `/api/v1/assets`
+- Auth: register, login, logout, session check (custom JWT with httpOnly cookies)
+- API key management: create, list, revoke (plan-enforced limits)
+- Stripe billing: checkout, subscription status, customer portal, webhooks
+- Redis-backed rate limiting: 1,000/day for Sandbox, unlimited for Standard
+- Usage logging and daily usage endpoint
 
-### Coverage
+**Frontend**
+- Marketing landing page with 2-tier pricing (Sandbox + Standard)
+- Auth pages: register (with one-time API key reveal), login
+- Dashboard: plan status, usage progress bar, API key count
+- API key management: generate, list, revoke with confirmation
+- Billing: upgrade to Standard via Stripe, manage subscription via Stripe Portal
+- Responsive sidebar layout with session guard
 
-| Asset Class | Count | Examples |
-|---|---|---|
-| Fiat Currencies | 170+ | USD, EUR, GBP, JPY, CAD... |
-| Cryptocurrencies | 250+ | BTC, ETH, SOL, ADA, DOT... |
-| Equities | 5,000+ | AAPL, GOOGL, MSFT, TSLA... |
-| Precious Metals & Commodities | 10+ | XAU, XAG, XPT, WTI Crude... |
+**Infrastructure**
+- GitHub Actions CI (lint + build + typecheck)
+- Vercel cron scheduling for data ingestion and pruning
+- Upstash Redis for rate limiting
 
-**~5,430 base rates → ~29 million pair combinations** via rate triangulation, all served in <100ms.
+### What's Not Built Yet
 
----
-
-## The Business
-
-### Who Pays (5 Validated Buyer Personas)
-
-| Buyer | Plan | Monthly Spend | TAM |
-|---|---|---|---|
-| Fintech MVP Builder | Builder ($19/mo) | Replaces $80–$150/mo fragmented stack | ~180K devs |
-| SaaS Platform (invoicing, payments) | Scale ($49/mo) | Embeddable widget saves a full sprint | ~45K SaaS products |
-| Dev Agency | Enterprise ($149/mo) | One sub shared across all client projects | ~12K agencies |
-| Indie Hacker | Sandbox (free) → Builder ($19/mo) | Generous free tier converts on growth | ~500K indie devs |
-| Internal Tool Builder | Scale ($49/mo) | One vendor, one PO, ships in 2 days | ~200K companies |
-
-### Market Sizing
-
-| | Value |
-|---|---|
-| **TAM** | $850M (financial data API market) |
-| **SAM** | $120M/year (devs paying $10–$500/mo) |
-| **SOM Year 1** | $120K ARR (~400 customers @ $25/mo avg) |
-| **SOM Year 3** | $600K ARR (~2,000 customers) |
-
-### Unit Economics
-
-- **Upstream data cost:** ~$180/month (fixed, all providers combined)
-- **Break-even:** 4 Scale customers
-- **Gross margin at 200 users:** 97%
-- **Year 1 revenue:** ~$36K | **Year 1 infra cost:** ~$4K | **Year 1 net:** ~$32K
+- API documentation page
+- Redis caching for API responses (currently only used for rate limiting)
+- Edge caching (Cloudflare Workers)
+- Rate triangulation (cross-pair calculations like CAD/XAU from USD base rates)
+- Expanded asset coverage (PRD targets 5,430+ symbols)
+- Batch endpoint, conversion endpoint, webhook alerts
+- Tests
 
 ---
 
-## Pricing
-
-| Tier | Price | Daily Calls | Key Features |
-|---|---|---|---|
-| **Sandbox** | Free | 1,000 | EOD data, 4 asset classes, 30 days history |
-| **Builder** | $19/mo | 10,000 | 15-min data, 1-year history, 5 alerts, conversion engine |
-| **Scale** | $49/mo | 100,000 | 5-year history, 50 alerts, widgets, 10 API keys |
-| **Enterprise** | $149/mo | Unlimited | SLA, unlimited alerts, SSO, team workspace, white-label |
-
-Hard caps, no overage charges — ever. 20% discount on annual billing.
-
----
-
-## Technical Architecture
-
-### Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 15 (App Router) |
-| Auth | Clerk |
-| Billing | Stripe |
-| Database | MongoDB Atlas |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript |
+| Database | PostgreSQL + Drizzle ORM |
 | Cache | Upstash Redis (serverless) |
-| Job Queue | BullMQ on Railway |
-| Edge | Cloudflare Workers |
-| Docs | Mintlify |
-| Monitoring | BetterStack + Sentry |
-
-### The Three-Layer Cache Shield (99%+ Hit Rate)
-
-```
-User Request
-    │
-    ▼
-[Edge Cache — Cloudflare KV]  ──── HIT (85%) ──→  Return (0ms origin)
-    │ MISS
-    ▼
-[Redis Cache — Upstash]  ──── HIT (13%) ──→  Return + hydrate edge
-    │ MISS
-    ▼
-[MongoDB Atlas]  ──── Source of truth ──→  Return + hydrate Redis + edge
-```
-
-Data that's 15 minutes old is identical for every user asking the same question. This is the most cacheable API imaginable. 95%+ of requests never touch our origin.
-
-### Data Ingestion Pipeline
-
-| Asset Class | Primary Provider | Fallback | Frequency |
-|---|---|---|---|
-| Fiat (170+) | Open Exchange Rates ($12/mo) | ExchangeRate.host (free) | Every 15 min |
-| Crypto (250+) | CoinGecko Pro ($129/mo) | CoinCap (free) | Every 5 min |
-| Equities (5,000+) | Twelve Data ($29/mo) | Alpha Vantage (free) | Every 15 min |
-| Metals (10+) | Metals.dev ($9/mo) | Gold-API (free) | Every 15 min |
-
-**Total upstream cost: ~$179/month** — fixed, does not scale with users.
-
-### "Never Fail" Contract
-
-The API always returns 200 with the best available data. If all upstream providers fail, we serve stale data with a `meta.warnings` field. Users never see 500 for data availability reasons.
-
-### Rate Triangulation
-
-Store ~5,430 base rates (everything vs USD). Calculate any pair on-the-fly:
-
-```
-Stored:     USD→EUR = 0.94, USD→BTC = 0.00001
-Requested:  EUR→BTC
-Calculated: (USD→BTC) / (USD→EUR) = 0.00001064
-```
-
-Runs in <1ms. No additional API calls. ~29 million possible pairs from ~5,430 stored rates.
+| Auth | Custom JWT (jose, bcryptjs, httpOnly cookies) |
+| Billing | Stripe (Checkout, Webhooks, Customer Portal) |
+| Styling | Tailwind CSS v4, Lucide React, Framer Motion |
+| Fonts | Geist Sans + Geist Mono |
+| Deployment | Vercel |
 
 ---
 
-## Competitive Moat
+## API Endpoints
 
-| Moat | Description |
-|---|---|
-| **Schema Normalization** | Every response, regardless of asset class, has the same shape. The "Stripe moment" — we win on DX, not data novelty. |
-| **Cross-Asset Conversion** | `GET /convert?from=BTC&to=XAU&amount=0.5` — no competitor offers this across asset classes. |
-| **Webhook Alerts** | Push > Poll. We eliminate custom polling + cron + comparison logic. |
-| **Developer Experience** | Interactive playground, SDKs in 5 languages, generous free tier. |
-| **Switching Cost** | Once our SDK is in a codebase, replacing it means rewriting every data call. |
+### Data API (requires `Authorization: Bearer vl_<key>`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/v1/rates?symbols=BTC/USD,EUR/USD` | Latest EOD rates (max 50 symbols) |
+| GET | `/api/v1/rates/history?symbol=BTC/USD&start=2024-01-01&end=2024-01-31` | Historical daily rates |
+| GET | `/api/v1/assets` | List all supported symbols by asset class |
+
+### Auth
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Create account (auto-generates API key + session) |
+| POST | `/api/auth/login` | Login (sets session cookie) |
+| POST | `/api/auth/logout` | Logout (clears session) |
+| GET | `/api/auth/me` | Current user info + subscription status |
+
+### API Keys (requires session)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/keys` | List active keys |
+| POST | `/api/keys` | Generate new key (plan limit enforced) |
+| DELETE | `/api/keys/:id` | Revoke a key |
+
+### Billing (requires session)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/billing/checkout` | Create Stripe Checkout session |
+| GET | `/api/billing/subscription` | Get subscription status |
+| POST | `/api/billing/portal` | Get Stripe Customer Portal link |
+
+### Other
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/usage/today` | Today's API call count (for dashboard) |
+| GET | `/api/health` | Health check (DB + Redis ping) |
 
 ---
 
-## Go-To-Market (4 Phases)
+## Plans
 
-1. **Developer SEO & Content** (Months 1–3) — Own search intent for "free crypto API," "forex API," "stock price API" (87K+ combined monthly searches)
-2. **Community & Dev Rel** (Months 2–5) — Open-source SDKs, tutorials, Product Hunt launch, Reddit/Twitter presence
-3. **Embed in Workflows** (Months 4–8) — Vercel templates, Retool/Appsmith connectors, Zapier/Make integrations
-4. **Partnerships & B2B** (Months 6–12) — Pitch invoicing tools and SaaS platforms as embedded rate provider
-
----
-
-## Development Roadmap
-
-| Week | Milestone |
-|---|---|
-| 1–2 | Project setup, auth, database, basic landing page |
-| 3–4 | Data ingestion pipeline (all 4 asset classes) |
-| 5–6 | Core API endpoints live with rate limiting and caching |
-| 7–8 | Developer portal, API key management, usage dashboard |
-| 9–10 | Stripe billing integration (4 tiers) |
-| 11–12 | Webhook alert system |
-| 13–14 | Documentation, SDKs, status page |
-| 15–16 | Polish, SEO content, Product Hunt launch |
+| | Sandbox | Standard |
+|---|---|---|
+| Price | Free | $10/month ($96/year) |
+| API calls | 1,000/day | Unlimited |
+| Data | EOD (24hr delayed) | EOD (24hr delayed) |
+| History | 30 days | 90 days |
+| API keys | 1 | 2 |
+| Trial | - | 7-day free trial |
 
 ---
 
-## Running Locally
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL database
+- Upstash Redis instance
+- Stripe account (test mode)
+
+### Setup
 
 ```bash
-# Clone the repository
+# Clone
 git clone https://github.com/AHussain101/savi_finance_api.git
 cd savi_finance_api
 
-# Install dependencies
+# Install
 npm install
 
-# Run development server
-npm run dev
+# Configure environment
+cp .env.example .env.local
+# Fill in DATABASE_URL, REDIS_URL, REDIS_TOKEN, STRIPE keys, JWT_SECRET
 
-# Open http://localhost:3000
+# Run database migrations
+npm run db:migrate
+
+# Seed initial data (optional)
+npm run db:seed
+
+# Ingest EOD data from providers
+npm run data:ingest
+
+# Start dev server
+npm run dev
 ```
 
-## Deploying to Vercel
+Open [http://localhost:3000](http://localhost:3000).
 
-This project is configured for one-click Vercel deployment:
+### Available Scripts
 
-1. Push to GitHub
-2. Import in [Vercel](https://vercel.com/new)
-3. Deploy — no environment variables needed for the pitch site
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npm run db:generate` | Generate Drizzle migrations |
+| `npm run db:migrate` | Run migrations |
+| `npm run db:push` | Push schema directly (dev) |
+| `npm run db:studio` | Open Drizzle Studio |
+| `npm run db:seed` | Seed database |
+| `npm run data:ingest` | Fetch EOD data from providers |
+| `npm run data:prune` | Remove data older than 90 days |
 
 ---
 
@@ -221,43 +182,54 @@ This project is configured for one-click Vercel deployment:
 ```
 src/
 ├── app/
-│   ├── layout.tsx        # Root layout with fonts and metadata
-│   ├── page.tsx          # Main pitch page — assembles all sections
-│   └── globals.css       # Tailwind config, animations, custom utilities
+│   ├── api/
+│   │   ├── auth/           # register, login, logout, me
+│   │   ├── billing/        # checkout, subscription, portal
+│   │   ├── keys/           # API key CRUD
+│   │   ├── usage/          # Daily usage stats
+│   │   ├── health/         # Health check
+│   │   ├── webhooks/       # Stripe webhook handler
+│   │   ├── cron/           # Vercel cron jobs (ingest, prune)
+│   │   └── v1/             # Data API (rates, history, assets)
+│   ├── auth/               # Login + register pages
+│   ├── dashboard/          # Dashboard, keys, billing pages
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Landing page
+│   └── globals.css         # Tailwind theme + animations
 ├── components/
-│   ├── Navbar.tsx         # Sticky navigation with section links
-│   ├── Hero.tsx           # Hero section with ticker, stats, CTAs
-│   ├── Problem.tsx        # Before/After comparison (fragmented vs unified)
-│   ├── ApiDemo.tsx        # Interactive API preview with code examples
-│   ├── Buyers.tsx         # 5 buyer personas with TAM and pricing
-│   ├── Market.tsx         # TAM/SAM/SOM analysis and revenue projections
-│   ├── Competitive.tsx    # Competitor comparison table and moat analysis
-│   ├── Pricing.tsx        # 4-tier pricing cards with unit economics
-│   ├── Architecture.tsx   # System diagram, tech stack, caching strategy
-│   ├── GoToMarket.tsx     # 4-phase GTM strategy and development roadmap
-│   ├── Risks.tsx          # Risk matrix, KPIs, and success metrics
-│   └── Footer.tsx         # Final CTA and footer links
+│   ├── ui/                 # Button, Input, Card, Badge, Modal, Spinner
+│   └── *.tsx               # Landing page sections
+├── contexts/
+│   └── AuthContext.tsx      # Client-side auth state
+├── db/
+│   ├── schema.ts           # Drizzle table definitions
+│   ├── client.ts           # DB connection
+│   ├── queries/            # Query functions per table
+│   └── migrations/         # SQL migration files
+├── lib/
+│   ├── auth.ts             # JWT sign/verify, session cookies
+│   ├── authenticateApiKey.ts # API key validation middleware
+│   ├── rateLimit.ts        # Redis rate limiting
+│   ├── redis.ts            # Upstash Redis client
+│   └── stripe.ts           # Stripe client
+└── scripts/
+    ├── ingest-eod.ts       # EOD data fetcher
+    └── prune-rates.ts      # Data retention cleanup
 ```
 
 ---
 
-## Tech Stack (This Pitch Site)
+## Environment Variables
 
-- **Next.js 15** with App Router and TypeScript
-- **Tailwind CSS v4** for styling
-- **Lucide React** for icons
-- **Framer Motion** for animations
-- **Geist** font family (Sans + Mono)
-- Deployed on **Vercel**
+See [`.env.example`](.env.example) for the full list. Key variables:
 
----
-
-## The Thesis
-
-> Developers are paying $29–$199/month *each* to 3–5 separate financial data providers. VaultLine replaces the duct-tape stack with one key, one schema, one bill. We don't compete with data providers — we sit on top of them and sell the normalization.
->
-> **This is the Stripe of financial market data.**
-
----
-
-*VaultLine: Stop juggling. Start shipping.*
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Upstash Redis REST URL |
+| `REDIS_TOKEN` | Yes | Upstash Redis auth token |
+| `STRIPE_SECRET_KEY` | Yes | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Yes | Stripe webhook signing secret |
+| `JWT_SECRET` | Yes | Secret for signing session JWTs |
+| `NEXT_PUBLIC_APP_URL` | Yes | App URL (no trailing slash) |
+| `FINANCIAL_DATA_API_KEY` | No | Premium data provider key |
