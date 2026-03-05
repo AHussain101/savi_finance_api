@@ -69,7 +69,10 @@ function RegisterForm() {
         if (registerRes.status === 409) {
           setErrors({ email: "An account with this email already exists" });
         } else {
-          setErrors({ general: registerData.error || "Registration failed" });
+          const errorMsg = registerData.details
+            ? `${registerData.error}: ${registerData.details}`
+            : registerData.error || "Registration failed";
+          setErrors({ general: errorMsg });
         }
         return;
       }

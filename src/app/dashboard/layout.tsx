@@ -14,7 +14,7 @@ const navItems = [
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
 ];
 
-function DashboardNav() {
+function DashboardNav({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -126,7 +126,7 @@ function DashboardNav() {
 
         {/* Main content */}
         <main className="flex-1 lg:pl-64">
-          <div className="p-6 lg:p-8">{/* Children rendered here via slot */}</div>
+          <div className="p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </div>
@@ -136,10 +136,7 @@ function DashboardNav() {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <DashboardNav />
-      <div className="lg:pl-64">
-        <div className="p-6 lg:p-8">{children}</div>
-      </div>
+      <DashboardNav>{children}</DashboardNav>
     </AuthProvider>
   );
 }
