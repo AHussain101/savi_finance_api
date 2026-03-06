@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRedis } from './redis';
+import { getRedis, isRedisConfigured } from './redis';
 import type { Plan } from '@/db/schema';
 
 const SANDBOX_DAILY_LIMIT = 1000;
@@ -52,19 +52,51 @@ export async function checkRateLimit(
   apiKeyId: string,
   plan: Plan
 ): Promise<RateLimitResult> {
+  const resetTimestamp = getNextMidnightUtc();
+
+  // If Redis isn't configured, allow all requests (local development)
+  if (!isRedisConfigured()) {
+    return {
+      allowed: true,
+      limit: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      remaining: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      reset: resetTimestamp,
+    };
+  }
+
   const redis = getRedis();
+  if (!redis) {
+    // Fallback: allow if Redis unavailable
+    return {
+      allowed: true,
+      limit: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      remaining: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      reset: resetTimestamp,
+    };
+  }
+
   const dateKey = getUtcDateKey();
   const redisKey = `rl:${apiKeyId}:${dateKey}`;
 
-  // Increment the counter
-  const count = await redis.incr(redisKey);
+  let count: number;
+  try {
+    // Increment the counter
+    count = await redis.incr(redisKey);
 
-  // Set expiry on first increment (24 hours from now to be safe)
-  if (count === 1) {
-    await redis.expire(redisKey, 86400);
+    // Set expiry on first increment (24 hours from now to be safe)
+    if (count === 1) {
+      await redis.expire(redisKey, 86400);
+    }
+  } catch (error) {
+    // Redis error - allow request to proceed
+    console.error('Redis rate limit error:', error);
+    return {
+      allowed: true,
+      limit: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      remaining: plan === 'standard' ? -1 : SANDBOX_DAILY_LIMIT,
+      reset: resetTimestamp,
+    };
   }
-
-  const resetTimestamp = getNextMidnightUtc();
 
   // Standard plan: unlimited (never block)
   if (plan === 'standard') {
@@ -145,10 +177,23 @@ export async function rateLimitMiddleware(
  * Get current usage count for an API key (for display purposes)
  */
 export async function getCurrentUsage(apiKeyId: string): Promise<number> {
-  const redis = getRedis();
-  const dateKey = getUtcDateKey();
-  const redisKey = `rl:${apiKeyId}:${dateKey}`;
+  if (!isRedisConfigured()) {
+    return 0;
+  }
 
-  const count = await redis.get<number>(redisKey);
-  return count ?? 0;
+  const redis = getRedis();
+  if (!redis) {
+    return 0;
+  }
+
+  try {
+    const dateKey = getUtcDateKey();
+    const redisKey = `rl:${apiKeyId}:${dateKey}`;
+
+    const count = await redis.get<number>(redisKey);
+    return count ?? 0;
+  } catch (error) {
+    console.error('Redis getCurrentUsage error:', error);
+    return 0;
+  }
 }
