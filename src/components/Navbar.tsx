@@ -12,6 +12,7 @@ const links = [
   { label: "Pricing", href: "#pricing" },
   { label: "Architecture", href: "#architecture" },
   { label: "GTM", href: "#gtm" },
+  { label: "Docs", href: "/docs" },
 ];
 
 export default function Navbar() {
