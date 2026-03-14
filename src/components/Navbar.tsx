@@ -6,13 +6,13 @@ import { Menu, X, Vault, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const links = [
-  { label: "Problem", href: "#problem" },
-  { label: "API", href: "#api-demo" },
-  { label: "Buyers", href: "#buyers" },
-  { label: "Market", href: "#market" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Architecture", href: "#architecture" },
-  { label: "GTM", href: "#gtm" },
+  { label: "Problem", href: "/#problem" },
+  { label: "API", href: "/#api-demo" },
+  { label: "Buyers", href: "/#buyers" },
+  { label: "Market", href: "/#market" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Architecture", href: "/#architecture" },
+  { label: "GTM", href: "/#gtm" },
   { label: "Docs", href: "/docs" },
 ];
 
