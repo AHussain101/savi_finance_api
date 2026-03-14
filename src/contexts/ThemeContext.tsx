@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useCallback, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -11,36 +11,49 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function getThemeSnapshot(): Theme {
+  if (typeof window === "undefined") return "dark";
+  return (localStorage.getItem("theme") as Theme) ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+}
+
+function getServerSnapshot(): Theme {
+  return "dark";
+}
+
+function subscribeToTheme(callback: () => void): () => void {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+  const handler = () => callback();
+  mediaQuery.addEventListener("change", handler);
+  window.addEventListener("storage", handler);
+  return () => {
+    mediaQuery.removeEventListener("change", handler);
+    window.removeEventListener("storage", handler);
+  };
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  const theme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored) {
-      setTheme(stored);
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
+  const toggleTheme = useCallback(() => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", newTheme);
 
     const root = document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+    root.classList.add(newTheme);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
+    // Trigger re-render by dispatching storage event
+    window.dispatchEvent(new Event("storage"));
+  }, [theme]);
 
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <>{children}</>;
+  // Sync DOM with theme on mount
+  if (typeof window !== "undefined") {
+    const root = document.documentElement;
+    if (!root.classList.contains(theme)) {
+      root.classList.remove("light", "dark");
+      root.classList.add(theme);
+    }
   }
 
   return (
